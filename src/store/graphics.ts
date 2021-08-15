@@ -8,7 +8,7 @@ const ACTION_TYPE = {
 
 type Action = { type: keyof typeof ACTION_TYPE, payload: any };
 
-function createGraphic(payload: { id?: string, props: any }) {
+function createGraphic(payload: { id?: string, type: string, props: any }) {
     return {
         type: ACTION_TYPE.CREATE_GRAPHIC,
         payload: { ...payload, id: payload.id ?? '' }
@@ -27,11 +27,13 @@ function reducer(state: GraphicsState = initialState, action: Action) {
     if (type === ACTION_TYPE.CREATE_GRAPHIC) {
         return {
             ...state,
-            [payload.id]: payload.props
+            [payload.id]: payload
         };
     } else if (type === ACTION_TYPE.REMOVE_GRAPHIC) {
         const { [payload.id]: _, ...newState } = state;
         return newState;
+    } else {
+        return state;
     }
 }
 

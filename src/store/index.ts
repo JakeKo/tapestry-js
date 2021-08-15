@@ -6,3 +6,4 @@ const store = createStore(combineReducers({
 }));
 
 export default store;
+export * from './graphics';
