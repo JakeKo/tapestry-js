@@ -21,14 +21,14 @@ function Rect(args) {
     }
 
     return <rect
-        x={origin.x}
-        y={origin.y}
-        width={dimensions.x}
-        height={dimensions.y}
-        fill={fill}
-        strokeWidth={strokeWidth}
-        stroke={strokeColor}
-        rotate={rotation}
+        x={origin?.x ?? 0}
+        y={origin?.y ?? 0}
+        width={dimensions?.x ?? 50}
+        height={dimensions?.y ?? 50}
+        fill={fill ?? '#000000FF'}
+        strokeWidth={strokeWidth ?? 0}
+        stroke={strokeColor ?? '#000000FF'}
+        rotate={rotation ?? 0}
 
         onMouseDown={onMouseDown}
     />;

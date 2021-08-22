@@ -11,28 +11,33 @@ const graphicComponentMap = {
 
 let i = 0;
 function App() {
-    const { createGraphic } = useTapestryStore();
+    const { createGraphic, updateGraphic } = useTapestryStore();
     const graphics = useSelector<AppState, GraphicsState>(state => state.graphics);
 
     useEffect(() => {
         listen(EVENT.GRAPHIC_MOUSE_DOWN, 'mousedown', event => {
             if (event.graphic.id !== 'hello-world') {
-                return;
+                updateGraphic({
+                    id: 'hello-world',
+                    props: {
+                        strokeWidth: i
+                    }
+                });
+            } else {
+                i++;
+                createGraphic({
+                    id: 'hello-world-' + i,
+                    type: 'rect', 
+                    props: {
+                        origin: { x: 50 * i, y: 0 },
+                        dimensions: { x: 50, y: 50 },
+                        fill: '#00000088',
+                        strokeWidth: 4,
+                        strokeColor: '#FF0000',
+                        rotation: 45
+                    }
+                });
             }
-
-            i++;
-            createGraphic({
-                id: 'hello-world-' + i,
-                type: 'rect', 
-                props: {
-                    origin: { x: 50 * i, y: 0 },
-                    dimensions: { x: 50, y: 50 },
-                    fill: '#00000088',
-                    strokeWidth: 4,
-                    strokeColor: '#FF0000',
-                    rotation: 45
-                }
-            });
         });
 
         createGraphic({

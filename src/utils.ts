@@ -5,6 +5,25 @@ function objectMap<T = any>(obj: Record<string, any>, transform: ([string, any])
     }, {});
 }
 
+function objectLayer(obj: Record<string, any>, ...layers: Record<string, any>[]): Record<string, any> {
+    const layered = { ...obj };
+
+    layers.forEach(layer => {
+        Object.entries(layer).forEach(([key, value]) => {
+            if (Array.isArray(value) || value === null) {
+                layered[key] = value;
+            } else if (typeof value === 'object') {
+                layered[key] = objectLayer(layered[key], value);
+            } else {
+                layered[key] = value;
+            }
+        });
+    });
+
+    return layered;
+}
+
 export {
-    objectMap
+    objectMap,
+    objectLayer
 };

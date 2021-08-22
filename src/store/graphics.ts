@@ -1,8 +1,10 @@
+import { objectLayer } from "../utils";
 import { GraphicsState } from "./types";
 
 const initialState = {};
 const ACTION_TYPE = {
     CREATE_GRAPHIC: 'graphics/createGraphic',
+    UPDATE_GRAPHIC: 'graphics/updateGraphic',
     REMOVE_GRAPHIC: 'graphics/removeGraphic'
 };
 
@@ -12,6 +14,13 @@ function createGraphic(payload: { id?: string, type: string, props: any }) {
     return {
         type: ACTION_TYPE.CREATE_GRAPHIC,
         payload: { ...payload, id: payload.id ?? '' }
+    };
+}
+
+function updateGraphic(payload: { id: string, props: any }) {
+    return {
+        type: ACTION_TYPE.UPDATE_GRAPHIC,
+        payload
     };
 }
 
@@ -29,6 +38,11 @@ function reducer(state: GraphicsState = initialState, action: Action) {
             ...state,
             [payload.id]: payload
         };
+    } else if (type === ACTION_TYPE.UPDATE_GRAPHIC) {
+        return {
+            ...state,
+            [payload.id]: objectLayer(state[payload.id], payload)
+        };
     } else if (type === ACTION_TYPE.REMOVE_GRAPHIC) {
         const { [payload.id]: _, ...newState } = state;
         return newState;
@@ -40,5 +54,6 @@ function reducer(state: GraphicsState = initialState, action: Action) {
 export default reducer;
 export {
     createGraphic,
+    updateGraphic,
     removeGraphic
 }
