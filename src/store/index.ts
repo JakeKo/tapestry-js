@@ -1,9 +1,21 @@
-import { createStore, combineReducers } from 'redux';
-import graphicsReducer from './graphics';
+import { useDispatch } from 'react-redux';
+import { objectMap } from '../utils';
+import * as graphics from './graphics';
 
-const store = createStore(combineReducers({
-    graphics: graphicsReducer
-}));
+function useTapestryStore() {
+    const dispatch = useDispatch();
 
-export default store;
-export * from './graphics';
+    const actions = {
+        ...graphics
+    };
+
+    return objectMap(actions, ([key, action]) => [
+        key,
+        (...args: Parameters<typeof action>) => dispatch(action(...args))
+    ]);
+}
+
+export {
+    useTapestryStore
+};
+

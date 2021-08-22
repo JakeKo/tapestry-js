@@ -1,19 +1,41 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { EVENT, listen, unlisten } from './events';
 import { Rect } from './graphics';
-import { createGraphic } from './store';
+import { useTapestryStore } from './store';
 import { AppState, GraphicsState } from './store/types';
 
 const graphicComponentMap = {
     rect: Rect
 };
 
+let i = 0;
 function App() {
-    const dispatch = useDispatch();
+    const { createGraphic } = useTapestryStore();
     const graphics = useSelector<AppState, GraphicsState>(state => state.graphics);
 
     useEffect(() => {
-        dispatch(createGraphic({
+        listen(EVENT.GRAPHIC_MOUSE_DOWN, 'mousedown', event => {
+            if (event.graphic.id !== 'hello-world') {
+                return;
+            }
+
+            i++;
+            createGraphic({
+                id: 'hello-world-' + i,
+                type: 'rect', 
+                props: {
+                    origin: { x: 50 * i, y: 0 },
+                    dimensions: { x: 50, y: 50 },
+                    fill: '#00000088',
+                    strokeWidth: 4,
+                    strokeColor: '#FF0000',
+                    rotation: 45
+                }
+            });
+        });
+
+        createGraphic({
             id: 'hello-world',
             type: 'rect', 
             props: {
@@ -24,13 +46,16 @@ function App() {
                 strokeColor: '#FF0000',
                 rotation: 45
             }
-        }));
+        });
+
+        return () => unlisten(EVENT.GRAPHIC_MOUSE_DOWN, 'mousedown');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return <svg>
         {Object.values(graphics).map(g => {
             const Graphic = graphicComponentMap[g.type];
-            return <Graphic key={g.id} props={g.props} />;
+            return <Graphic key={g.id} {...g} />;
         })}
     </svg>;
 }
