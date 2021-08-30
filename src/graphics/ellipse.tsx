@@ -2,7 +2,7 @@ import { MouseEvent, memo } from "react";
 import { decorateGraphicEvent } from "../events";
 import { add, scale, towards, Vector } from "../vector";
 
-function Rect(args) {
+function Ellipse(args) {
     const { props = {} } = args;
     const {
         origin,
@@ -36,11 +36,11 @@ function Rect(args) {
         },
     };
 
-    return <rect
-        x={origin?.x ?? 0}
-        y={origin?.y ?? 0}
-        width={dimensions?.x ?? 50}
-        height={dimensions?.y ?? 50}
+    return <ellipse
+        cx={center?.x ?? 0}
+        cy={center?.y ?? 0}
+        rx={(dimensions?.x ?? 50) / 2}
+        ry={(dimensions?.y ?? 50) / 2}
         fill={fill ?? '#000000FF'}
         strokeWidth={strokeWidth ?? 0}
         stroke={strokeColor ?? '#000000FF'}
@@ -54,4 +54,4 @@ function Rect(args) {
     />;
 }
 
-export default memo(Rect);
+export default memo(Ellipse);

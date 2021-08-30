@@ -1,44 +1,37 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { EVENT, listen, unlisten } from './events';
+import { decorateCanvasEvent, EVENT, EventHandler, listen, listenOnce, unlisten } from './events';
 import { Rect } from './graphics';
+import Ellipse from './graphics/ellipse';
 import { useTapestryStore } from './store';
 import { AppState, GraphicsState } from './store/types';
+import { objectLayer } from './utils';
 
 const graphicComponentMap = {
-    rect: Rect
+    rect: Rect,
+    ellipse: Ellipse
 };
 
-let i = 0;
 function App() {
     const { createGraphic, updateGraphic } = useTapestryStore();
     const graphics = useSelector<AppState, GraphicsState>(state => state.graphics);
 
     useEffect(() => {
-        listen(EVENT.GRAPHIC_MOUSE_DOWN, 'mousedown', event => {
-            if (event.graphic.id !== 'hello-world') {
-                updateGraphic({
-                    id: 'hello-world',
-                    props: {
-                        strokeWidth: i
-                    }
-                });
-            } else {
-                i++;
-                createGraphic({
-                    id: 'hello-world-' + i,
-                    type: 'rect', 
-                    props: {
-                        origin: { x: 50 * i, y: 0 },
-                        dimensions: { x: 50, y: 50 },
-                        fill: '#00000088',
-                        strokeWidth: 4,
-                        strokeColor: '#FF0000',
-                        rotation: 45
-                    }
-                });
-            }
-        });
+        const moveGraphic: EventHandler = ({ baseEvent, graphic, utils }) => {
+            const cursorOffset = utils.cursorOffset(baseEvent);
+
+            listen(EVENT.CANVAS.MOUSE_MOVE, 'mousemove', ({ baseEvent }) => {
+                updateGraphic(objectLayer({ id: graphic.id }, utils.drag(baseEvent, cursorOffset)));
+            });
+
+            listenOnce(EVENT.CANVAS.MOUSE_UP, 'mouseup', () => {
+                unlisten(EVENT.CANVAS.MOUSE_MOVE, 'mousemove');
+                listenOnce(EVENT.GRAPHIC.MOUSE_DOWN,'mousedown', moveGraphic);
+            });
+        };
+        listenOnce(EVENT.GRAPHIC.MOUSE_DOWN, 'mousedown', moveGraphic);
 
         createGraphic({
             id: 'hello-world',
@@ -47,17 +40,29 @@ function App() {
                 origin: { x: 0, y: 0 },
                 dimensions: { x: 50, y: 50 },
                 fill: '#00000088',
-                strokeWidth: 4,
+                strokeWidth: 10,
                 strokeColor: '#FF0000',
                 rotation: 45
             }
         });
 
-        return () => unlisten(EVENT.GRAPHIC_MOUSE_DOWN, 'mousedown');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        createGraphic({
+            id: 'circle',
+            type: 'ellipse', 
+            props: {
+                origin: { x: 100, y: 100 },
+                dimensions: { x: 50, y: 50 },
+                fill: '#00000088'
+            }
+        });
+
+        return () => unlisten(EVENT.GRAPHIC.MOUSE_DOWN, 'mousedown');
     }, []);
 
-    return <svg>
+    return <svg
+        onMouseMove={decorateCanvasEvent('MOUSE_MOVE')}
+        onMouseUp={decorateCanvasEvent('MOUSE_UP')}
+    >
         {Object.values(graphics).map(g => {
             const Graphic = graphicComponentMap[g.type];
             return <Graphic key={g.id} {...g} />;
