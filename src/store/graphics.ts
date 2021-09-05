@@ -1,59 +1,26 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { objectLayer } from "../utils";
 import { GraphicsState } from "./types";
 
-const initialState = {};
-const ACTION_TYPE = {
-    CREATE_GRAPHIC: 'graphics/createGraphic',
-    UPDATE_GRAPHIC: 'graphics/updateGraphic',
-    REMOVE_GRAPHIC: 'graphics/removeGraphic'
-};
-
-type Action = { type: keyof typeof ACTION_TYPE, payload: any };
-
-function createGraphic(payload: { id?: string, type: string, props: any }) {
-    return {
-        type: ACTION_TYPE.CREATE_GRAPHIC,
-        payload: { ...payload, id: payload.id ?? '' }
-    };
-}
-
-function updateGraphic(payload: { id: string, props: any }) {
-    return {
-        type: ACTION_TYPE.UPDATE_GRAPHIC,
-        payload
-    };
-}
-
-function removeGraphic(payload: { id: string }) {
-    return {
-        type: ACTION_TYPE.REMOVE_GRAPHIC,
-        payload
-    };
-}
-
-function reducer(state: GraphicsState = initialState, action: Action) {
-    const { type, payload } = action;
-    if (type === ACTION_TYPE.CREATE_GRAPHIC) {
-        return {
-            ...state,
-            [payload.id]: payload
-        };
-    } else if (type === ACTION_TYPE.UPDATE_GRAPHIC) {
-        return {
-            ...state,
-            [payload.id]: objectLayer(state[payload.id], payload)
-        };
-    } else if (type === ACTION_TYPE.REMOVE_GRAPHIC) {
-        const { [payload.id]: _, ...newState } = state;
-        return newState;
-    } else {
-        return state;
+const graphics = createSlice({
+    name: 'graphics',
+    initialState: {} as GraphicsState,
+    reducers: {
+        createGraphic(state, action: PayloadAction<{ id: string, type: string, props: any }>) {
+            state[action.payload.id] = action.payload;
+        },
+        updateGraphic(state, action: PayloadAction<{ id: string, props: any, meta: any }>) {
+            state[action.payload.id] = objectLayer(state[action.payload.id], action.payload);
+        },
+        removeGraphic(state, action: PayloadAction<string>) {
+            delete state[action.payload];
+        }
     }
-}
+});
 
-export default reducer;
-export {
+export default graphics.reducer;
+export const {
     createGraphic,
     updateGraphic,
     removeGraphic
-}
+} = graphics.actions;

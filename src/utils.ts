@@ -23,7 +23,14 @@ function objectLayer(obj: Record<string, any>, ...layers: Record<string, any>[])
     return layered;
 }
 
+function objectRemove(obj: Record<string, any> = {}, keys: (keyof typeof obj)[] = []): typeof obj {
+    const newObj = { ...obj };
+    keys.forEach(key => delete newObj[key]);
+    return newObj;
+}
+
 export {
     objectMap,
-    objectLayer
+    objectLayer,
+    objectRemove
 };

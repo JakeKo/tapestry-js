@@ -1,13 +1,15 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { objectMap } from '../utils';
+import { objectMap, objectRemove } from '../utils';
 import * as graphics from './graphics';
+import * as canvas from './canvas';
 import { AppState, GraphicsState } from './types';
 
 function useTapestryStore() {
     const dispatch = useDispatch();
 
     const actions = {
-        ...graphics
+        ...objectRemove(graphics, ['default']),
+        ...objectRemove(canvas, ['default']),
     };
 
     return objectMap(actions, ([key, action]) => [
