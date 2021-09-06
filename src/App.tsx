@@ -3,11 +3,11 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { decorateCanvasEvent, EVENT, EventHandler, listen, listenOnce, unlisten } from './events';
-import { Rect } from './graphics';
-import Ellipse from './graphics/ellipse';
+import { Rect, Ellipse } from './graphics';
 import { useTapestryStore } from './store';
-import { AppState, GraphicsState } from './store/types';
+import { AppState } from './store/types';
 import { objectLayer } from './utils';
+import { apply, towards, transform } from './vector';
 
 const graphicComponentMap = {
     rect: Rect,
@@ -16,8 +16,8 @@ const graphicComponentMap = {
 
 function App() {
     const { createGraphic, updateGraphic, setCursor, setCursorLock } = useTapestryStore();
-    const graphics = useSelector<AppState, GraphicsState>(state => state.graphics);
-    const cursor = useSelector<AppState, string>(state => state.canvas.cursor);
+    const graphics = useSelector((state: AppState) => state.graphics);
+    const cursor = useSelector((state: AppState) => state.canvas.cursor);
 
     useEffect(() => {
         const moveGraphic: EventHandler = ({ baseEvent, graphic, utils }) => {
@@ -40,40 +40,51 @@ function App() {
 
         listenOnce(EVENT.GRAPHIC.MOUSE_DOWN, 'mousedown', moveGraphic);
 
+        const drawGraphic: EventHandler = ({ baseEvent, graphic }) => {
+            if (graphic) {
+                return;
+            }
+
+            const id = Math.random().toString();
+            const position = { x: baseEvent.clientX, y: baseEvent.clientY };
+            createGraphic({
+                id,
+                type: 'rect',
+                props: {
+                    origin: position,
+                    dimensions: { x: 0, y: 0 }
+                }
+            });
+
+            listen(EVENT.CANVAS.MOUSE_MOVE, 'draw', ({ baseEvent }) => {
+                const newPosition = { x: baseEvent.clientX, y: baseEvent.clientY };
+                updateGraphic({
+                    id,
+                    props: {
+                        origin: apply(position, newPosition, Math.min),
+                        dimensions: transform(towards(position, newPosition), Math.abs),
+                    }
+                });
+            });
+
+            listenOnce(EVENT.CANVAS.MOUSE_UP, 'end-draw', () => {
+                unlisten(EVENT.CANVAS.MOUSE_MOVE, 'draw');
+                listenOnce(EVENT.CANVAS.MOUSE_DOWN, 'start-draw', drawGraphic);
+            });
+        };
+
+        listenOnce(EVENT.CANVAS.MOUSE_DOWN, 'start-draw', drawGraphic);
+
         listen(EVENT.CANVAS.MOUSE_MOVE, 'canvas-cursor', ({ graphic }) => {
             setCursor(graphic ? 'grab' : 'default');
         });
-
-        createGraphic({
-            id: 'hello-world',
-            type: 'rect',
-            props: {
-                origin: { x: 0, y: 0 },
-                dimensions: { x: 50, y: 50 },
-                fill: '#00000088',
-                strokeWidth: 10,
-                strokeColor: '#FF0000',
-                rotation: 45,
-            },
-        });
-
-        createGraphic({
-            id: 'circle',
-            type: 'ellipse',
-            props: {
-                origin: { x: 100, y: 100 },
-                dimensions: { x: 50, y: 50 },
-                fill: '#00000088'
-            }
-        });
-
-        return () => unlisten(EVENT.GRAPHIC.MOUSE_DOWN, 'mousedown');
     }, []);
 
     return <svg
+        onMouseDown={decorateCanvasEvent('MOUSE_DOWN')}
         onMouseMove={decorateCanvasEvent('MOUSE_MOVE')}
         onMouseUp={decorateCanvasEvent('MOUSE_UP')}
-        style={{ cursor }}
+        style={{ width: '100%', height: '100%', cursor }}
     >
         {Object.values(graphics).map(g => {
             const Graphic = graphicComponentMap[g.type];

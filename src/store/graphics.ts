@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import { objectLayer } from "../utils";
 import { GraphicsState } from "./types";
 
@@ -10,7 +10,7 @@ const graphics = createSlice({
             state[action.payload.id] = action.payload;
         },
         updateGraphic(state, action: PayloadAction<{ id: string, props: any, meta: any }>) {
-            state[action.payload.id] = objectLayer(state[action.payload.id], action.payload);
+            state[action.payload.id] = objectLayer(current(state[action.payload.id]), action.payload);
         },
         removeGraphic(state, action: PayloadAction<string>) {
             delete state[action.payload];

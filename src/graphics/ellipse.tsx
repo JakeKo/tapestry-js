@@ -1,9 +1,20 @@
-import { MouseEvent, memo } from "react";
-import { decorateGraphicEvent } from "../events";
-import { add, scale, towards, Vector } from "../vector";
+import { memo } from "react";
+import { decorateGraphicEvents } from "../events";
+import { objectLayer } from "../utils";
+import { add, scale } from "../vector";
+import { graphicUtils } from "./utils";
 
 function Ellipse(args) {
-    const { props = {} } = args;
+    const fullArgs = objectLayer({
+        props: {
+            origin: { x: 0, y: 0 },
+            dimensions: { x: 0, y: 0 },
+            fill: '#000000FF',
+            strokeWidth: 0,
+            strokeColor: '#000000FF',
+            rotation: 0
+        },
+    }, args);
     const {
         origin,
         dimensions,
@@ -11,46 +22,27 @@ function Ellipse(args) {
         strokeWidth,
         strokeColor,
         rotation
-    } = props;
+    } = fullArgs.props;
 
     const center = add(origin, scale(dimensions, 0.5))
-
     const eventPayload = {
-        graphic: args,
+        graphic: fullArgs,
         utils: {
             center,
-            cursorOffset: (event: MouseEvent): Vector => {
-                const position = { x: event.clientX, y: event.clientY };
-                return towards(position, origin);
-            },
-            drag: (event: MouseEvent, cursorOffset: Vector): any => {
-                return {
-                    props: {
-                        origin: {
-                            x: event.clientX + cursorOffset.x,
-                            y: event.clientY + cursorOffset.y,
-                        },
-                    },
-                };
-            }
+            ...graphicUtils({ origin }),
         },
     };
 
     return <ellipse
-        cx={center?.x ?? 0}
-        cy={center?.y ?? 0}
-        rx={(dimensions?.x ?? 50) / 2}
-        ry={(dimensions?.y ?? 50) / 2}
-        fill={fill ?? '#000000FF'}
-        strokeWidth={strokeWidth ?? 0}
-        stroke={strokeColor ?? '#000000FF'}
-        transform={[
-            `rotate(${rotation ?? 0} ${center.x} ${center.y})`
-        ].join(' ')}
-
-        onMouseDown={decorateGraphicEvent('MOUSE_DOWN', eventPayload)}
-        onMouseMove={decorateGraphicEvent('MOUSE_MOVE', eventPayload)}
-        onMouseUp={decorateGraphicEvent('MOUSE_UP', eventPayload)}
+        cx={center.x}
+        cy={center.y}
+        rx={dimensions.x / 2}
+        ry={dimensions.y / 2}
+        fill={fill}
+        strokeWidth={strokeWidth}
+        stroke={strokeColor}
+        transform={`rotate(${rotation} ${center.x} ${center.y})`}
+        {...decorateGraphicEvents(eventPayload)}
     />;
 }
 

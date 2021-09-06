@@ -107,6 +107,14 @@ function decorateGraphicEvent(event: keyof typeof EVENT.GRAPHIC, payload: Object
     }
 }
 
+function decorateGraphicEvents(eventPayload: Object = {}) {
+    return {
+        onMouseDown: decorateGraphicEvent('MOUSE_DOWN', eventPayload),
+        onMouseMove: decorateGraphicEvent('MOUSE_MOVE', eventPayload),
+        onMouseUp: decorateGraphicEvent('MOUSE_UP', eventPayload),
+    };
+}
+
 export {
     EVENT,
     listen,
@@ -119,5 +127,6 @@ export {
     isHeard,
     dispatch,
     decorateCanvasEvent,
-    decorateGraphicEvent
+    decorateGraphicEvent,
+    decorateGraphicEvents
 }
