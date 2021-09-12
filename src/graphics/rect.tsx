@@ -14,6 +14,7 @@ function Rect(args) {
             strokeColor: '#000000FF',
             rotation: 0
         },
+        meta: {},
     }, args);
     const {
         origin,
@@ -24,13 +25,10 @@ function Rect(args) {
         rotation
     } = fullArgs.props;
 
-    const center = add(origin, scale(dimensions, 0.5))
+    const center = add(origin, scale(dimensions, 0.5));
     const eventPayload = {
         graphic: fullArgs,
-        utils: {
-            center,
-            ...graphicUtils({ origin }),
-        },
+        utils: graphicUtils({ origin, dimensions }),
     };
 
     return <rect

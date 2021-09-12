@@ -14,6 +14,7 @@ function Ellipse(args) {
             strokeColor: '#000000FF',
             rotation: 0
         },
+        meta: {},
     }, args);
     const {
         origin,
@@ -27,10 +28,7 @@ function Ellipse(args) {
     const center = add(origin, scale(dimensions, 0.5))
     const eventPayload = {
         graphic: fullArgs,
-        utils: {
-            center,
-            ...graphicUtils({ origin }),
-        },
+        utils: graphicUtils({ origin, dimensions }),
     };
 
     return <ellipse

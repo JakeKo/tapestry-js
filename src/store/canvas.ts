@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { CanvasState } from './types';
 
 const canvas = createSlice({
     name: 'canvas',
     initialState: {
         cursor: 'default',
         cursorLock: false
-    },
+    } as CanvasState,
     reducers: {
         setCursor(state, action: PayloadAction<string>) {
             if (!state.cursorLock) {

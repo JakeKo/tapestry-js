@@ -22,6 +22,23 @@ function App() {
     useEffect(() => {
         const moveGraphic: EventHandler = ({ baseEvent, graphic, utils }) => {
             const cursorOffset = utils.cursorOffset(baseEvent);
+
+            if (!graphic.meta.isHighlighted && !graphic.meta.notHighlightable) {
+                const box = utils.box();
+
+                updateGraphic({ id: graphic.id, meta: { isHighlighted: true } });
+                ['topLeft', 'topRight', 'bottomLeft', 'bottomRight'].forEach(position => {
+                    createGraphic({
+                        id: position,
+                        type: 'ellipse',
+                        props: {
+                            dimensions: { x: 10, y: 10 },
+                            origin: box[position]
+                        },
+                    })
+                });
+            }
+
             setCursor('grabbing');
             setCursorLock(true);
 
@@ -49,7 +66,7 @@ function App() {
             const position = { x: baseEvent.clientX, y: baseEvent.clientY };
             createGraphic({
                 id,
-                type: 'rect',
+                type: 'ellipse',
                 props: {
                     origin: position,
                     dimensions: { x: 0, y: 0 }
